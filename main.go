@@ -11,33 +11,25 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Invalid number of args: %d. Expecting exactly 1 arg", len(os.Args)-1)
 	}
 
-	inputStr := args[1]
-	operand, offset, _ := StringToInt64(inputStr, 10)
+	inputStr := []byte(args[1])
+	token := Tokenize(inputStr)
 
 	fmt.Printf("  .globl main\n")
 	fmt.Printf("main:\n")
-	fmt.Printf("  mov $%d, %%rax\n", operand)
+	fmt.Printf("  mov $%d, %%rax\n", token.GetInt64Val())
+	token = token.next
 
-	for offset+1 < len(inputStr) {
-		if inputStr[offset] == '+' {
-			// assert len(inputStr) > offset + 1, same below
-			operand, parsedOffset, _ := StringToInt64(inputStr[offset+1:], 10)
-			offset++ // ++ due to symbol
-			offset += parsedOffset
-			fmt.Printf("  add $%d, %%rax\n", operand)
+	for token.kind != TK_EOF {
+		if token.Equals([]byte("+")) {
+			token = token.next // Assume token.next is not nil
+			fmt.Printf("  add $%d, %%rax\n", token.GetInt64Val())
+			token = token.next
 			continue
 		}
 
-		if inputStr[offset] == '-' {
-			operand, parsedOffset, _ := StringToInt64(inputStr[offset+1:], 10)
-			offset++ // ++ due to symbol
-			offset += parsedOffset
-			fmt.Printf("  sub $%d, %%rax\n", operand)
-			continue
-		}
-
-		fmt.Printf("Unexpected char %c at %d\n", inputStr[offset], offset)
-		os.Exit(1)
+		token = token.Skips([]byte("-"))
+		fmt.Printf("  sub $%d, %%rax\n", token.GetInt64Val())
+		token = token.next
 	}
 
 	fmt.Printf("  ret\n")
