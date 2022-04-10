@@ -5,34 +5,30 @@ import (
 	"strconv"
 )
 
+func isDigit(r byte) bool {
+	return r >= '0' && r <= '9'
+}
+
 func StringToInt64(s string, base int) (val int64, offset int, err error) {
 	if len(s) == 0 {
 		return -1, -1, errors.New("unable to parse empty string into int64")
 	}
 
-	offset = 1
-	phaseValue := int64(-1)
-	err = nil
-	hasValidResult := false
-
+	scanIndex := 0
 	if s[0] == '-' || s[0] == '+' {
-		offset = 2
+		scanIndex++
 	}
-	for offset <= len(s) {
-		num, err := strconv.ParseInt(s[:offset], base, 64)
-		offset++
-
-		if err != nil {
-			offset--
-			break
+	for scanIndex < len(s) {
+		if isDigit(s[scanIndex]) {
+			scanIndex++
+			continue
 		}
-
-		phaseValue = num
-		hasValidResult = true
+		break
 	}
+	val, err = strconv.ParseInt(s[:scanIndex], base, 64)
 
-	if hasValidResult {
-		return phaseValue, offset - 1, nil
+	if err != nil {
+		return -1, -1, err
 	}
-	return -1, -1, err
+	return val, scanIndex, nil
 }

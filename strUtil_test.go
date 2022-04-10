@@ -31,7 +31,7 @@ func TestStringToInt64(t *testing.T) {
 
 	s = " -1"
 	val, offset, err = StringToInt64(s, 10)
-	if val != -1 || offset != -1 || err != nil {
-		t.Error("Expecting to get error due to leading space but no error is returned")
+	if val != -1 || offset != -1 || err == nil {
+		t.Error("Expecting to get error due to leading space but no error is returned: ", val, offset, err)
 	}
 }
