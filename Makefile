@@ -2,7 +2,7 @@ GOCMD=go
 GOBUILD=$(GOCMD) build
 
 chibicc-golang: main.go
-	$(GOBUILD) -o chibicc-golang main.go strUtil.go tokenizer.go
+	$(GOBUILD) -o chibicc-golang main.go strUtil.go tokenizer.go errors.go
 
 test: chibicc-golang
 	bash ./test.sh

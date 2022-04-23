@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"log"
 )
 
 type TokenKind int32
@@ -19,7 +18,7 @@ type Token struct {
 	kind      TokenKind
 	next      *Token
 	val       int64
-	wholeLine []byte // Where token embedded in
+	wholeLine []byte // Where token embedded in. Note this is a reference
 	offset    int    // The 0-based start index of the token
 	length    int    // The length of the token
 }
@@ -34,14 +33,14 @@ func (t Token) Equals(s []byte) bool {
 
 func (t Token) Skips(s []byte) *Token {
 	if !t.Equals(s) {
-		log.Panicf("Expects token string %s but got %s", t.ByteSlice(), s)
+		Error_at(t, "Expects token string %s but got %s", t.ByteSlice(), s)
 	}
 	return t.next
 }
 
 func (t Token) GetInt64Val() int64 {
 	if t.kind != TK_NUM {
-		log.Panicf("Expects token of type TK_NUM but got %d", t.kind)
+		Error_at(t, "Expects token of type TK_NUM but got %d", t.kind)
 	}
 	return t.val
 }
@@ -72,7 +71,7 @@ func Tokenize(s []byte) *Token {
 		if IsDigit(s[scanIndex]) {
 			val, offset, err := StringToInt64(s[scanIndex:], 10)
 			if err != nil {
-				log.Panic(err)
+				Error_panic(err)
 			}
 
 			cur.next = NewToken(TK_NUM, s, scanIndex, offset)
@@ -90,7 +89,7 @@ func Tokenize(s []byte) *Token {
 			continue
 		}
 
-		log.Panicf("Invalid token: %s", s[scanIndex:])
+		Log_panic("Invalid token: %s", s[scanIndex:])
 	}
 
 	cur.next = NewToken(TK_EOF, []byte(""), 0, 0)

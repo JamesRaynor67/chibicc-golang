@@ -9,6 +9,7 @@ func main() {
 	args := os.Args
 	if len(args) != 2 {
 		fmt.Fprintf(os.Stderr, "Invalid number of args: %d. Expecting exactly 1 arg", len(os.Args)-1)
+		os.Exit(1)
 	}
 
 	inputStr := []byte(args[1])
